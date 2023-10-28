@@ -36,7 +36,11 @@ class Scheduler(object):
         pass
 
     def check_timeout(self):
-        pass
+        for queue in [self.round_robin_t1, self.round_robin_t2, self.priority_queue, self.first_come_first_serve]:
+            for task in queue:
+                if task[3] < self.env.now:
+                    queue.remove(task)
+                    self.expired_processes += 1
 
     def dispatcher(self):
         pass
