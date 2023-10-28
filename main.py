@@ -119,7 +119,10 @@ class Scheduler(object):
             plt.ylabel('count')
             plt.title(i)
             plt.show()
-            print('mean', i, 'delay =', sum(queues[i]) / len(queues[i]))
+            try:
+                print('mean', i, 'delay =', sum(queues[i]) / len(queues[i]))
+            except ZeroDivisionError:
+                print('mean', i, 'delay =', 0)
         print('Percentage of expired processes =', self.expired_processes / self.count * 100)
         print('waiting time mean =', sum(self.waiting_time) / len(self.waiting_time))
         print('cpu worked time=', 100 - (len(self.cpu_work_count) / self.duration) * 100)
