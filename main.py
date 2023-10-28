@@ -94,13 +94,17 @@ class Scheduler(object):
                 yield self.env.timeout(quantum_time)
 
     def first_come_first_serve_process(self):
-        self.first_come_first_serve_count.extend(
-            [len(self.first_come_first_serve)] * (self.env.now - len(self.first_come_first_serve_count) - 1))
-        task = self.first_come_first_serve.pop()
-        self.waiting_time.append((self.env.now + task[1]) - task[0])
-        self.first_come_first_serve_count.append(len(self.first_come_first_serve_count))
-        self.idle_status = False
-        yield self.env.timeout(task[1])
+        if len(self.first_come_first_serve) > 0:
+            self.first_come_first_serve_count.extend(
+                [len(self.first_come_first_serve)] * (self.env.now - len(self.first_come_first_serve_count) - 1))
+            task = self.first_come_first_serve.pop()
+            self.waiting_time.append((self.env.now + task[1]) - task[0])
+            self.first_come_first_serve_count.append(len(self.first_come_first_serve_count))
+            self.idle_status = False
+            yield self.env.timeout(task[1])
+        else:
+            self.first_come_first_serve_count.extend([0] * (self.env.now - len(self.first_come_first_serve_count)))
+            self.idle_status = True
 
     def analyse(self):
         pass
