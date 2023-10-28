@@ -29,9 +29,10 @@ class Scheduler(object):
         self.idle_status = True
         self.duration = duration
 
-    def job_creator(self):
-        pass
-
+    def job_creator(self, x_rate, y_mean, z_mean):
+        task_generated = (random.poisson(lam=x_rate, size=1)[0], int(random.exponential(scale=y_mean, size=1)[0]),
+                          random.choice(arange(1, 4), p=[0.7, 0.2, 0.1], size=1)[0],
+                          int(random.exponential(scale=z_mean, size=1)[0]))
     def run(self):
         pass
 
