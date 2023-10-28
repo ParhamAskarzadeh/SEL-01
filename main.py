@@ -44,6 +44,33 @@ class Scheduler(object):
     def job_loader(self):
         pass
 
+    def __update_service_time_in_tuple(self, main_tuple, service_time):
+        new_tuple = list(main_tuple)
+        new_tuple[1] = service_time
+        return tuple(new_tuple)
+
+    def round_robin_t1_process(self, quantum_time):
+        if len(self.round_robin_t1) == 0:
+            self.round_robin_t1_count.extend([0] * (self.env.now - len(self.round_robin_t1_count)))
+            self.idle_status = True
+        for task in self.round_robin_t1:
+            if task[1] <= quantum_time:
+                self.round_robin_t1_count.extend(
+                    [len(self.round_robin_t1)] * (self.env.now - len(self.round_robin_t1_count) - 1))
+                self.waiting_time.append((self.env.now + task[1]) - task[0])
+                self.round_robin_t1.remove(task)
+                self.round_robin_t1_count.append(len(self.round_robin_t1))
+                self.idle_status = False
+                yield self.env.timeout(task[1])
+            else:
+                self.round_robin_t1_count.extend(
+                    [len(self.round_robin_t1)] * (self.env.now - len(self.round_robin_t1_count) - 1))
+                self.round_robin_t2.append(self.__update_service_time_in_tuple(task, task[1] - quantum_time))
+                self.round_robin_t1.remove(task)
+                self.round_robin_t1_count.append(len(self.round_robin_t1))
+                self.idle_status = False
+                yield self.env.timeout(quantum_time)
+
     def round_robin_t2_process(self):
         pass
 
