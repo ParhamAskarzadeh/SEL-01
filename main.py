@@ -33,6 +33,8 @@ class Scheduler(object):
         task_generated = (random.poisson(lam=x_rate, size=1)[0], int(random.exponential(scale=y_mean, size=1)[0]),
                           random.choice(arange(1, 4), p=[0.7, 0.2, 0.1], size=1)[0],
                           int(random.exponential(scale=z_mean, size=1)[0]))
+        self.priority_queue.append(task_generated)
+
     def run(self):
         pass
 
