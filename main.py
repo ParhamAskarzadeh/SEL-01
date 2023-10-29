@@ -36,7 +36,10 @@ class Scheduler(object):
         self.priority_queue.append(task_generated)
 
     def run(self):
-        pass
+        process = random.choice([self.round_robin_t1_process(self.quantum1), self.round_robin_t2_process(self.quantum2),
+                                 self.first_come_first_serve_process()], p=[0.8, 0.1, 0.1], size=1)[0]
+        yield self.env.process(process)
+
 
     def check_timeout(self):
         for queue in [self.round_robin_t1, self.round_robin_t2, self.priority_queue, self.first_come_first_serve]:
