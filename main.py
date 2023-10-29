@@ -36,10 +36,22 @@ class Scheduler(object):
         self.priority_queue.append(task_generated)
 
     def run(self):
-        process = random.choice([self.round_robin_t1_process(self.quantum1), self.round_robin_t2_process(self.quantum2),
-                                 self.first_come_first_serve_process()], p=[0.8, 0.1, 0.1], size=1)[0]
-        yield self.env.process(process)
-
+        time = 0
+        period_time = 2
+        for _ in range(self.count):
+            self.job_creator(y_mean=self.y_mean, x_rate=self.x_rate, z_mean=self.z_mean)
+        while True:
+            self.check_timeout()
+            if time % period_time == 0 or time == 0:
+                self.job_loader(k=self.k)
+            time = self.env.now
+            yield self.env.process(self.dispatcher())
+            if self.idle_status:
+                self.cpu_work_count.append(1)
+            if time == self.env.now:
+                yield self.env.timeout(1)
+            if time + self.env.now > time + period_time:
+                time += period_time
 
     def check_timeout(self):
         for queue in [self.round_robin_t1, self.round_robin_t2, self.priority_queue, self.first_come_first_serve]:
