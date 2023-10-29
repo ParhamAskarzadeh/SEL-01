@@ -41,7 +41,7 @@ class Scheduler(object):
     def check_timeout(self):
         for queue in [self.round_robin_t1, self.round_robin_t2, self.priority_queue, self.first_come_first_serve]:
             for task in queue:
-                if task[2] < self.env.now:
+                if task[3] < self.env.now:
                     queue.remove(task)
                     self.expired_processes += 1
 
