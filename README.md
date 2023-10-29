@@ -55,6 +55,8 @@ The `Scheduler` class has several methods:
 - `analyse`: Analyzes and displays the results of the simulation, including queue counts, mean delay, expired processes percentage, waiting time mean, and CPU worked time.
 
 
+## Questions
+
 <div style="text-align: right;">
 
 ## پوشه‌ی .git
