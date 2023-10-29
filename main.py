@@ -163,3 +163,11 @@ class Scheduler(object):
         print('Percentage of expired processes =', self.expired_processes / self.count * 100)
         print('waiting time mean =', sum(self.waiting_time) / len(self.waiting_time))
         print('cpu worked time=', 100 - (len(self.cpu_work_count) / self.duration) * 100)
+
+
+env = simpy.Environment()
+duration = 50
+simulation = Scheduler(env=env, task_count=25, y_mean=2, z_mean=10, x_rate=3, k=2, quantum1=1, quantum2=2,
+                       duration=duration)
+env.run(until=duration)
+simulation.analyse()
