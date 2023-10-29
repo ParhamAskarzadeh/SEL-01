@@ -36,7 +36,22 @@ class Scheduler(object):
         self.priority_queue.append(task_generated)
 
     def run(self):
-        pass
+        time = 0
+        period_time = 2
+        for _ in range(self.count):
+            self.job_creator(y_mean=self.y_mean, x_rate=self.x_rate, z_mean=self.z_mean)
+        while True:
+            self.check_timeout()
+            if time % period_time == 0 or time == 0:
+                self.job_loader(k=self.k)
+            time = self.env.now
+            yield self.env.process(self.dispatcher())
+            if self.idle_status:
+                self.cpu_work_count.append(1)
+            if time == self.env.now:
+                yield self.env.timeout(1)
+            if time + self.env.now > time + period_time:
+                time += period_time
 
     def check_timeout(self):
         for queue in [self.round_robin_t1, self.round_robin_t2, self.priority_queue, self.first_come_first_serve]:
@@ -46,10 +61,25 @@ class Scheduler(object):
                     self.expired_processes += 1
 
     def dispatcher(self):
-        pass
+        process = random.choice([self.round_robin_t1_process(self.quantum1), self.round_robin_t2_process(self.quantum2),
+                                 self.first_come_first_serve_process()], p=[0.8, 0.1, 0.1], size=1)[0]
+        yield self.env.process(process)
 
-    def job_loader(self):
-        pass
+    def __sort_priority_queue(self):
+        self.priority_queue = sorted(self.priority_queue, key=operator.itemgetter(2, 1), reverse=True)
+
+    def job_loader(self, k):
+        self.__sort_priority_queue()
+        self.priority_queue_count.extend(
+            [len(self.priority_queue)] * (self.env.now - len(self.priority_queue_count) - 1))
+        if len(self.round_robin_t1 + self.round_robin_t2 + self.first_come_first_serve) < k:
+            counter = 0
+            for idx, task in enumerate(self.priority_queue):
+                if counter == k:
+                    break
+                if task[0] <= self.env.now:
+                    self.round_robin_t1.append(self.priority_queue.pop(idx))
+                    counter += 1
 
     def __update_service_time_in_tuple(self, main_tuple, service_time):
         new_tuple = list(main_tuple)
@@ -133,3 +163,12 @@ class Scheduler(object):
         print('Percentage of expired processes =', self.expired_processes / self.count * 100)
         print('waiting time mean =', sum(self.waiting_time) / len(self.waiting_time))
         print('cpu worked time=', 100 - (len(self.cpu_work_count) / self.duration) * 100)
+
+
+if __name__ == '__main__':
+    env = simpy.Environment()
+    duration = 50
+    simulation = Scheduler(env=env, task_count=25, y_mean=2, z_mean=10, x_rate=3, k=2, quantum1=1, quantum2=2,
+                           duration=duration)
+    env.run(until=duration)
+    simulation.analyse()
