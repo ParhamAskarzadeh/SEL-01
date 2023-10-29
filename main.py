@@ -61,7 +61,9 @@ class Scheduler(object):
                     self.expired_processes += 1
 
     def dispatcher(self):
-        pass
+        process = random.choice([self.round_robin_t1_process(self.quantum1), self.round_robin_t2_process(self.quantum2),
+                                 self.first_come_first_serve_process()], p=[0.8, 0.1, 0.1], size=1)[0]
+        yield self.env.process(process)
 
     def job_loader(self):
         pass
