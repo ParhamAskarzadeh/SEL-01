@@ -61,10 +61,24 @@ class Scheduler(object):
                     self.expired_processes += 1
 
     def dispatcher(self):
-        pass
+        new_tuple = list(main_tuple)
+        new_tuple[1] = service_time
+        return tuple(new_tuple)
+    def __sort_priority_queue(self):
+        self.priority_queue = sorted(self.priority_queue, key=operator.itemgetter(2, 1), reverse=True)
 
-    def job_loader(self):
-        pass
+    def job_loader(self, k):
+        self.__sort_priority_queue()
+        self.priority_queue_count.extend(
+            [len(self.priority_queue)] * (self.env.now - len(self.priority_queue_count) - 1))
+        if len(self.round_robin_t1 + self.round_robin_t2 + self.first_come_first_serve) < k:
+            counter = 0
+            for idx, task in enumerate(self.priority_queue):
+                if counter == k:
+                    break
+                if task[0] <= self.env.now:
+                    self.round_robin_t1.append(self.priority_queue.pop(idx))
+                    counter += 1
 
     def __update_service_time_in_tuple(self, main_tuple, service_time):
         new_tuple = list(main_tuple)
